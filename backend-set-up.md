@@ -28,7 +28,7 @@
 - `npx gitignore node`: create .gitignore file with nodemodules in it
 - Add depencies. Doing these creates & updates package-lock.json.
   - `npm i express sqlite3 knex knex-cleaner cors bcryptjs`: Express for the node framework/network stuff. Sqlite3 for the database driver. Knex for building SQL queries in JS.
-  - `npm i -D nodemon`: installs nodemon as a dev dependency, which monitors changes in node.js and automatically restarts the server.
+  - `npm i -D nodemon`: installs nodemon as a dev dependency, which monitors changes in node and automatically restarts the server.
 - In package.json, add the following:
   ```js
     "scripts": {
@@ -41,7 +41,7 @@
 
 > create server
 
-- `touch index.js` ==> nodemon runs this, where the server is listening to a port
+- `touch index.js` ==> nodemon watches this. Import server logic and listen on port.
 
   ```js
   const server = require("./api/server.js");
@@ -51,7 +51,7 @@
   server.listen(port, () => console.log(`\n\nSERVER UP!\n\n`));
   ```
 
-> using Express module
+> using Express framework
 
 - `touch server.js` ==> server logic, routes, middleware, etc. Replace `name` with the `resource`
 
@@ -59,13 +59,11 @@
   const express = require("express");
   const nameRouter = require("../name/name-router.js");
 
-  const server = express();
-
-  const router = express.Router(); // if you're using router here
+  const server = express(); // create instance of Express application to configure server
 
   server.use(express.json());
 
-  // Sanity check
+  // Sanity check - basic route handler which executes on every `GET` request to URL specified.
   server.get(`/`, (req, res) => {
     res.status(200).json({ api: "I am up!" });
   });
@@ -76,7 +74,7 @@
   module.exports = server;
   ```
 
-> Using http module
+> If using http module
 
 ```js
 const http = require("http"); // built in node.js module to handle http traffic
@@ -92,23 +90,40 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, hostname, () => {
-  // start watching for connections on the port specified
+  // start monitoring for connections on the port specified
   console.log(`Server running at http://${hostname}:${port}/`);
 });
 ```
 
+## Express Router
+
+> Use Express Router to modularize your code (route <> resource)
+
+```js
+const express = require("express)
+const router = express.Router()
+
+router.get(`/`, (req,res)=> {
+  res.status(200).send("hello from /resourceName endpoint")
+})
+
+router.get(`/:id`, (req,res)=> {
+  const id = req.params.id
+  res.status(200).send(`hello from /resourceName/${id} endpoint`)
+})
+
+module.exports = router
+```
+
 ## Knex
 
-- npx allows us to run programs out of our local node_modules.
+> Note: npx allows us to run programs out of our local node_modules.
 
-- Create knexfile.js:
+- `npx knex init` - creates knexfile.js
 
-  - `npx knex init`
-
-    - can remove staging & development from knexfile.js
-    - `pool` ===> needed for SQLite because it doesn't enforce foreign keys. Not needed for postgresql
-    - `migrations` key
-    - `seeds` key
+  - can remove staging & development from knexfile.js if not needed.
+  - `pool` ==> Only needed for SQLite because it doesn't enforce foreign keys. Not needed for most databases.
+  - `migrations` & `seed` keys to specify directory of where to save.
 
     ```js
     module.exports = {
